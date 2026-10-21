@@ -31,7 +31,7 @@ struct LibraryView: View {
             }
             .background(Color("SurfaceBase").ignoresSafeArea())
             .navigationTitle("Library")
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search songs, artists, albums")
+            .searchable(text: $searchText, prompt: "Search songs, artists, albums")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     importButton

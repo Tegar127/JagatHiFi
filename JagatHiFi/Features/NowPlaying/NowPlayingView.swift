@@ -34,7 +34,9 @@ struct NowPlayingView: View {
                 }
             }
             .navigationTitle("")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
         }
         .onChange(of: playback.currentTime) { _, new in
             if !isSeeking { seekValue = new }
@@ -55,7 +57,11 @@ struct NowPlayingView: View {
     }
 
     private var artworkSize: CGFloat {
-        min(UIScreen.main.bounds.width - Spacing.base * 2 - 32, 360)
+        #if os(iOS)
+        return min(UIScreen.main.bounds.width - Spacing.base * 2 - 32, 360)
+        #else
+        return 320
+        #endif
     }
 
     // MARK: - Track info

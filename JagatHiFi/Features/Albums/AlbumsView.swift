@@ -142,7 +142,9 @@ struct AlbumDetailView: View {
         }
         .background(Color("SurfaceBase").ignoresSafeArea())
         .navigationTitle(album.albumName)
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
     }
 }
 
