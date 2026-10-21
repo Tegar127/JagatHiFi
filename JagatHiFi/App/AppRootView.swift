@@ -4,6 +4,7 @@
 
 import SwiftUI
 import SwiftData
+import Combine
 
 struct AppRootView: View {
     @EnvironmentObject private var playback: PlaybackViewModel
@@ -180,7 +181,7 @@ private struct LibraryRepoModifier: ViewModifier {
 }
 
 // Lazy singleton to avoid recreating the repository
-private final class LibraryRepositoryStore {
+private final class LibraryRepositoryStore: ObservableObject {
     static let shared = LibraryRepositoryStore()
     private var _repo: LibraryRepository?
 

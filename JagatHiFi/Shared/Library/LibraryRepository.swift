@@ -4,6 +4,7 @@
 import Foundation
 import SwiftData
 import UniformTypeIdentifiers
+import Combine
 
 // MARK: - Import result
 

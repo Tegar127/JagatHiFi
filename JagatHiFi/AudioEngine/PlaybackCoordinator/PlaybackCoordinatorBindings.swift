@@ -4,6 +4,12 @@
 import Foundation
 import AVFoundation
 import MediaPlayer
+#if canImport(UIKit)
+import UIKit
+#endif
+#if canImport(AppKit)
+import AppKit
+#endif
 
 extension PlaybackCoordinator {
 

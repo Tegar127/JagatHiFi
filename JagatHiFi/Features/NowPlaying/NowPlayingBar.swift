@@ -10,7 +10,7 @@ struct NowPlayingBar: View {
 
     var body: some View {
         if let track = playback.currentTrack {
-            compactBar(track: track)
+            compactBar(track)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
     }

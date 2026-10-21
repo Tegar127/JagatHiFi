@@ -3,6 +3,7 @@
 
 import Foundation
 import AVFoundation
+import Accelerate
 
 // MARK: - Settings
 

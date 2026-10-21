@@ -75,9 +75,8 @@ actor PlaybackCoordinator {
             try session.setCategory(.playback, mode: .default, options: [])
             try session.setActive(true)
         } catch {
-            Task { @MainActor in
-                viewModel?.errorMessage = "Audio session error: \(error.localizedDescription)"
-            }
+            let msg = "Audio session error: \(error.localizedDescription)"
+            Task { await self.publishError(msg) }
         }
         NotificationCenter.default.addObserver(
             forName: AVAudioSession.interruptionNotification,
@@ -114,9 +113,9 @@ actor PlaybackCoordinator {
             if let id = internalQueue.currentID { try await play(trackID: id) }
         case .all:
             if internalQueue.hasNext {
-                internalQueue.advance()
+                advanceQueue()
             } else {
-                internalQueue.replace(tracks: internalQueue.isEmpty ? [] : originalOrder, startingAt: 0)
+                replaceQueue(tracks: internalQueue.isEmpty ? [] : originalOrder, startingAt: 0)
             }
             if let id = internalQueue.currentID { try await play(trackID: id) }
         case .off:
@@ -124,7 +123,7 @@ actor PlaybackCoordinator {
                 await stop()
                 return
             }
-            internalQueue.advance()
+            advanceQueue()
             if let id = internalQueue.currentID { try await play(trackID: id) }
         }
     }
@@ -139,7 +138,7 @@ actor PlaybackCoordinator {
             try await seek(to: 0)
             return
         }
-        internalQueue.retreat()
+        retreatQueue()
         if let id = internalQueue.currentID { try await play(trackID: id) }
     }
 
@@ -271,12 +270,12 @@ actor PlaybackCoordinator {
     func setShuffle(_ on: Bool) async {
         isShuffled = on
         if on {
-            internalQueue.shuffle()
+            shuffleQueue()
         } else {
             let current = internalQueue.currentID
-            internalQueue.replace(tracks: originalOrder)
+            replaceQueue(tracks: originalOrder)
             if let id = current, let pos = originalOrder.firstIndex(of: id) {
-                internalQueue = PlaybackQueue(tracks: originalOrder, startingAt: pos)
+                replaceQueue(tracks: originalOrder, startingAt: pos)
             }
         }
         await publishViewModel()
@@ -358,7 +357,10 @@ actor PlaybackCoordinator {
         if let nodeTime = playerNode.lastRenderTime,
            let playerTime = playerNode.playerTime(forNodeTime: nodeTime) {
             let elapsed = Double(playerTime.sampleTime) / playerTime.sampleRate
-            if let track = viewModel?.currentTrack, track.duration > 0, elapsed >= track.duration - 0.1 {
+            if let trackID = currentState.currentTrackID,
+               let track = trackLookup[trackID],
+               track.duration > 0,
+               elapsed >= track.duration - 0.1 {
                 try? await playNext()
             }
         }
@@ -369,8 +371,10 @@ actor PlaybackCoordinator {
               let playerTime = playerNode.playerTime(forNodeTime: nodeTime) else { return }
         let elapsed = Double(playerTime.sampleTime) / playerTime.sampleRate + pausedAtTime
         currentTime = max(0, elapsed)
+        let time = currentTime
+        let vm = viewModel
         Task { @MainActor in
-            viewModel?.currentTime = currentTime
+            vm?.currentTime = time
         }
     }
 
@@ -448,6 +452,32 @@ actor PlaybackCoordinator {
     }
     #endif
 
+    // MARK: - Queue mutation helpers
+
+    private func advanceQueue() {
+        var q = internalQueue
+        q.advance()
+        internalQueue = q
+    }
+
+    private func retreatQueue() {
+        var q = internalQueue
+        q.retreat()
+        internalQueue = q
+    }
+
+    private func replaceQueue(tracks: [UUID], startingAt: Int = 0) {
+        var q = internalQueue
+        q.replace(tracks: tracks, startingAt: startingAt)
+        internalQueue = q
+    }
+
+    private func shuffleQueue() {
+        var q = internalQueue
+        q.shuffle()
+        internalQueue = q
+    }
+
     // MARK: - ViewModel publishing
 
     private func publishViewModel(track: Track? = nil) async {
@@ -458,21 +488,23 @@ actor PlaybackCoordinator {
         let time = currentTime
         let resolvedTrack = track ?? (currentState.currentTrackID.flatMap { trackLookup[$0] })
         let duration = resolvedTrack?.duration ?? 0
+        let vm = viewModel
 
         await MainActor.run {
-            viewModel?.state = state
-            viewModel?.queue = queue
-            viewModel?.repeatMode = repeat_
-            viewModel?.isShuffled = shuffled
-            viewModel?.currentTime = time
-            viewModel?.duration = duration
-            if let t = resolvedTrack { viewModel?.currentTrack = t }
+            vm?.state = state
+            vm?.queue = queue
+            vm?.repeatMode = repeat_
+            vm?.isShuffled = shuffled
+            vm?.currentTime = time
+            vm?.duration = duration
+            if let t = resolvedTrack { vm?.currentTrack = t }
         }
     }
 
     private func publishError(_ message: String) async {
+        let vm = viewModel
         await MainActor.run {
-            viewModel?.errorMessage = message
+            vm?.errorMessage = message
         }
     }
 }

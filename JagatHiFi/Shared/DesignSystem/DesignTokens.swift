@@ -32,32 +32,9 @@ enum Radius {
 // MARK: - Colors
 // Semantic color set. All values meet WCAG AA against their intended background (R-25).
 // Two core neutrals + one accent. No 5+ color rainbow (R-29).
-
-extension ShapeStyle where Self == Color {
-    // Surfaces
-    static var surfaceBase: Color { Color("SurfaceBase") }
-    static var surfaceRaised: Color { Color("SurfaceRaised") }
-    static var surfaceOverlay: Color { Color("SurfaceOverlay") }
-
-    // Text hierarchy — checked against graphite backgrounds:
-    // Primary (#FFFFFF): 18.1:1 on #1C1C1E — PASS
-    // Secondary (#AEAEB2): 5.6:1 on #1C1C1E — PASS
-    // Tertiary (#636366): 3.2:1 on #1C1C1E — PASS (large text only)
-    static var textPrimary: Color { Color("TextPrimary") }
-    static var textSecondary: Color { Color("TextSecondary") }
-    static var textTertiary: Color { Color("TextTertiary") }
-
-    // Accent: amber/gold (#F5A623)
-    // Ratio on #1C1C1E: 7.3:1 — PASS AA and AAA
-    // Purpose: marks active playback, selected items, and progress.
-    // Not used on buttons, icons, badges, and backgrounds simultaneously (R-13).
-    static var accent: Color { Color("Accent") }
-    static var accentDimmed: Color { Color("AccentDimmed") }
-
-    // Semantic
-    static var errorColor: Color { Color("ErrorColor") }
-    static var separator: Color { Color("Separator") }
-}
+// Symbols (surfaceBase, surfaceRaised, surfaceOverlay, textPrimary, textSecondary,
+// textTertiary, accent, accentDimmed, separator, errorColor) are automatically generated
+// by Xcode from Assets.xcassets into GeneratedAssetSymbols.swift.
 
 // MARK: - Typography
 // SF Pro (system font) — platform standard, correct for native Apple UI.

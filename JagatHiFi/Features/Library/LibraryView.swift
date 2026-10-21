@@ -4,6 +4,7 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 struct LibraryView: View {
     @Environment(\.modelContext) private var modelContext
@@ -175,7 +176,11 @@ struct LibraryView: View {
     // MARK: - Import
 
     private var supportedUTTypes: [UTType] {
-        [.audio, .mp3, .aiff, .wav, .init("org.xiph.flac") ?? .audio, .m4a]
+        var types: [UTType] = [.audio, .mp3, .aiff, .wav, .mpeg4Audio]
+        if let flac = UTType(filenameExtension: "flac") { types.append(flac) }
+        if let alac = UTType(filenameExtension: "alac") { types.append(alac) }
+        if let m4a = UTType(filenameExtension: "m4a") { types.append(m4a) }
+        return types
     }
 
     private func handleImport(_ result: Result<[URL], Error>) {

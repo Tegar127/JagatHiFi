@@ -79,7 +79,7 @@ actor MetadataReader {
         let tracks = try await asset.loadTracks(withMediaType: .audio)
         if let audioTrack = tracks.first {
             let formatDescriptions = try await audioTrack.load(.formatDescriptions)
-            if let desc = formatDescriptions.first as? CMAudioFormatDescription {
+            if let desc = formatDescriptions.first {
                 let basic = CMAudioFormatDescriptionGetStreamBasicDescription(desc)?.pointee
                 meta.sampleRate  = basic.map { $0.mSampleRate }
                 meta.channelCount = basic.map { Int($0.mChannelsPerFrame) }

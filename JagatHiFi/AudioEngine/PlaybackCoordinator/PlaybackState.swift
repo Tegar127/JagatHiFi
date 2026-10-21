@@ -1,6 +1,7 @@
 // PlaybackState.swift — Explicit playback state machine and queue model.
 
 import Foundation
+import SwiftUI
 
 // MARK: - Playback state
 
